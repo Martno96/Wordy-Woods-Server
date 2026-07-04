@@ -1,5 +1,3 @@
-// src/controllers/AuthController.js
-
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
@@ -9,18 +7,23 @@ export class AuthController {
   }
 
   async register(req, res) {
-    const { email, password } = req.body
+    const { username, display_name, email, password } = req.body
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' })
     }
 
-    const existing = await this.prisma.user.findUnique({ where: { email } })
-    if (existing) {
+    const email_existing = await this.prisma.user.findUnique({ where: { email } })
+    if (email_existing) {
       return res.status(409).json({ error: 'Email already in use' })
     }
 
+    const username_existing = await this.prisma.user.findUnique({ where: { email } })
+    if (username_existing) {
+      return res.status(409).json({ error: 'Username already in use' })
+    }
+
     const password_hash = await bcrypt.hash(password, 12)
-    const user = await this.prisma.user.create({ data: { email, password_hash } })
+    const user = await this.prisma.user.create({ data: { email, password_hash, display_name, username } })
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' })
     return res.status(201).json({ token })
