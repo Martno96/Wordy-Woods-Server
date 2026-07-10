@@ -1,7 +1,8 @@
 import { format } from 'date-fns'
+import type { Response } from 'express'
 
 export class HomeController {
-  index (req, res, next) {
+  index (res: Response) {
     res.json('home/index')
   }
 }

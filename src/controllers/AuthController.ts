@@ -1,12 +1,15 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-
+import type { PrismaClient } from '../generated/prisma/client'
+import type { Request, Response } from 'express'
 export class AuthController {
-  constructor(prisma) {
+  private prisma: PrismaClient
+  
+  constructor(prisma: PrismaClient) {
     this.prisma = prisma
   }
 
-  async register(req, res) {
+  async register(req: Request, res: Response) {
     const { username, display_name, email, password } = req.body
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' })
@@ -25,11 +28,11 @@ export class AuthController {
     const password_hash = await bcrypt.hash(password, 12)
     const user = await this.prisma.user.create({ data: { email, password_hash, display_name, username } })
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET ?? '', { expiresIn: '7d' })
     return res.status(201).json({ token })
   }
 
-  async login(req, res) {
+  async login(req: Request, res: Response) {
     const { email, password } = req.body
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' })
@@ -45,11 +48,7 @@ export class AuthController {
       return res.status(401).json({ error: 'Invalid credentials' })
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET ?? '', { expiresIn: '7d' })
     return res.status(200).json({ token })
-  }
-
-  me(req, res) {
-    return res.status(200).json({ user: req.user })
   }
 }

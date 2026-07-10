@@ -8,8 +8,8 @@ export const authRouter = Router()
 const controller = new AuthController(prisma)
 
 // POST
-authRouter.post('/register', (req, res, next) => controller.register(req, res))
-authRouter.post('/login', (req, res, next) => controller.login(req, res))
+authRouter.post('/register', (req, res) => controller.register(req, res))
+authRouter.post('/login', (req, res) => controller.login(req, res))
 
 // GET
 //authRouter.get('/me', requireAuth, (req, res, next) => controller.me(req, res, next))
